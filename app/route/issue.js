@@ -1,0 +1,292 @@
+const controller = require('./../controller/issueController');
+const appConfig = require('./../../config/appConfig');
+const auth = require('./../middleware/auth');
+
+let setRouter = (app) =>{
+    let baseUrl = `${appConfig.apiVersion}/issues`
+
+    //create issue
+    //params : issueTitle, issueDescription, assignedToId to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.post(`${baseUrl}/createIssue`, auth.isAuthenticated, controller.createIssue);
+
+    /**
+     * @api {post} /issues/createIssue createIssue
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueTitle title of the new issue to be passed as body parameter
+     * @apiParam {String} issueDescription description of the issue to be passed as body parameter
+     * @apiParam {String} assignedToId id of the user to whom the issue is being assigned to be passed as body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue created successfully",
+            "status": 200,
+            "data": {
+                "status": "new",
+                "createdOn": "2020-03-06T13:10:40.000Z",
+                "watchersId": [
+                    "pH4WJZvj",
+                    "TuWUOF5B"
+                ],
+                "commentsId": [],
+                "issueId": "Vu7dlg-2",
+                "reporterId": "pH4WJZvj",
+                "assignedToId": "TuWUOF5B",
+                "title": "first",
+                "description": "description"
+            }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "required input not valid",
+            "status": 500,
+            "data": null
+        }
+     */
+    
+    //getAllIssues
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.get(`${baseUrl}/getAllIssues`, auth.isAuthenticated, controller.getAllIssues);
+
+    /**
+     * @api {post} /issues/getAllIssues get all issues
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} skip integer value of number of issues to be displayed to be passed as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue details editted successfully",
+            "status": 200,
+            "data": {
+                "status": "new",
+                "createdOn": "2020-03-07T12:00:37.000Z",
+                "watchersId": [
+                    "pH4WJZvj",
+                    "TuWUOF5B"
+                ],
+                "commentsId": [],
+                "issueId": "I32rSYeE",
+                "reporterId": "pH4WJZvj",
+                "assignedToId": "TuWUOF5B",
+                "title": "first",
+                "description": "description"
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issues not found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+
+    //delete issue
+    //params : issueId to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/deleteIssue`, auth.isAuthenticated, controller.deleteIssue);
+
+    /**
+     * @api {post} /issues/deleteIssue delete issue
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId issue that is being deleted to be passed as body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue deleted successfully",
+            "status": 200,
+            "data": {
+                "status": "new",
+                "createdOn": "2020-03-07T11:17:21.000Z",
+                "watchersId": [
+                    "pH4WJZvj",
+                    "TuWUOF5B"
+                ],
+                "commentsId": [],
+                "_id": "5e6382c13609a455f834d968",
+                "issueId": "J2MfimkL",
+                "reporterId": "pH4WJZvj",
+                "assignedToId": "TuWUOF5B",
+                "title": "first",
+                "description": "description"
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issue details not found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+    //edit issue
+    //params : issueId to be passed as body parameter
+    //params : title edited title to be passed as body paramater
+    //params : description edited description to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.post(`${baseUrl}/editIssue`, auth.isAuthenticated, controller.editIssue);
+
+    /**
+     * @api {post} /issues/editIssue edit issue
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId issue that is being deleted to be passed as body parameter
+     * @apiParam {String} title edited title of the issue to be passed as body parameter optional
+     * @apiParam {String} description edited description of the issue to be passed as body parameter optional
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue details editted successfully",
+            "status": 200,
+            "data": {
+                "n": 1,
+                "nModified": 1,
+                "ok": 1
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issue details not found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+    //assign issue
+    //params : issueId to be passed as body parameter
+    //params : assignToId id of the user to whom the issue being assigned to be passed as a body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/assignIssue`, auth.isAuthenticated, controller.assignIssue);
+
+    /**
+     * @api {post} /issues/assignIssue assign issue
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId issue that is being deleted to be passed as body parameter
+     * @apiParam {String} assignToId id of the user to whom the issue is being assigned to can be passed as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue successfully assigned to user",
+            "status": 200,
+            "data": {
+                "n": 1,
+                "nModified": 1,
+                "ok": 1
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issue details not found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+    //watch issue
+    //params : issueId of the issue user wants to watch to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/watchIssue`, auth.isAuthenticated, controller.watchIssue);
+
+    /**
+     * @api {post} /issues/watchIssue watch issue
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId issue id of the issue user wants to watch to be passed as body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue added to watch list successfully",
+            "status": 200,
+            "data": {
+                "n": 1,
+                "nModified": 1,
+                "ok": 1
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issue details not found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+     //change issue status
+    //params : issueId of the issue for which the status is being changed to be passed as body parameter
+    //params : newStatus that is being update to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/changeIssueStatus`, auth.isAuthenticated, controller.changeIssueStatus);
+
+    /**
+     * @api {post} /issues/changeIssueStatus change issue status
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId issue id of the issue for which the status is being changed to be passed as body parameter
+     * @apiParam {String} newStatus status update to be passed as a string as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue status updated successfully",
+            "status": 200,
+            "data": {
+                "n": 1,
+                "nModified": 1,
+                "ok": 1
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issue details not found to update",
+            "status": 404,
+            "data": null
+        }
+     */
+
+
+
+    // app.put(`${baseUrl}/testDeleteIssue`, auth.isAuthenticated, controller.testDeleteIssue);
+
+}
+
+module.exports = {
+    setRouter : setRouter
+}
