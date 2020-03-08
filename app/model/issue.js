@@ -7,8 +7,8 @@ let IssueSchema = new Schema({
     assignedToId : { type : String},
     status : {type : String, default : "new"},
     createdOn : {type : Date, default : Date.now()},
-    title : { type : String},
-    description : {type : String},
+    title : { type : String, index : "text"},
+    description : {type : String, index: "text"},
     watchersId : { type : [], default : []},
     commentsId : { type : [], default : []}
 })

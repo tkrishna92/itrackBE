@@ -15,39 +15,39 @@ const issueModel = mongoose.model('Issue');
 const commentModel = mongoose.model('Comment');
 
 // create a new issue
-let createNewIssue = (req, res)=>{
+let createNewIssue = (req, res) => {
 
     //checking required input parameters
-    let validateInput = ()=>{
-        return new Promise((resolve, reject)=>{
-            if(check.isEmpty(req.body.issueTitle) || check.isEmpty(req.body.issueDescription) || check.isEmpty(req.body.assignedToId)){
+    let validateInput = () => {
+        return new Promise((resolve, reject) => {
+            if (check.isEmpty(req.body.issueTitle) || check.isEmpty(req.body.issueDescription) || check.isEmpty(req.body.assignedToId)) {
                 logger.error("required input not valid", "issueController : createNewIssue - validateInput", 9);
                 let apiResponse = response.generate(true, "required input not valid", 500, null);
                 reject(apiResponse);
-            }else{
+            } else {
                 resolve();
             }
         })
     }
 
     //creating a new issue
-    let creatingIssue = ()=>{
-        return new Promise((resolve, reject)=>{
+    let creatingIssue = () => {
+        return new Promise((resolve, reject) => {
             let newIssue = new issueModel({
-                issueId : shortId.generate(),
-                reporterId : req.user.userId,
-                assignedToId : req.body.assignedToId,
-                title : req.body.issueTitle,
-                description : req.body.issueDescription,
-                watchersId : [req.user.userId, req.body.assignedToId],
-                createdOn : time.localTimeNow()
+                issueId: shortId.generate(),
+                reporterId: req.user.userId,
+                assignedToId: req.body.assignedToId,
+                title: req.body.issueTitle,
+                description: req.body.issueDescription,
+                watchersId: [req.user.userId, req.body.assignedToId],
+                createdOn: time.localTimeNow()
             })
-            newIssue.save((err, result)=>{
-                if(err){
+            newIssue.save((err, result) => {
+                if (err) {
                     logger.error("error saving new issue", "issueController : createNewIssue - creatingIssue", 9);
                     let apiResponse = response.generate(true, "error while saving new issue", 500, err);
                     reject(apiResponse);
-                }else {
+                } else {
                     logger.info("new issue created successfully", "issueController : createNewIssue - creatingIssue", 8);
                     let newIssueDetails = result.toObject();
                     delete newIssueDetails.__v;
@@ -59,31 +59,31 @@ let createNewIssue = (req, res)=>{
     }
 
     //adding the new issue to the watched list of reported and assignedTo user
-    let addIssueToWatchList = (newIssueDetails)=>{
-        return new Promise((resolve, reject)=>{
-            userModel.findOneAndUpdate({userId : req.user.userId}, {$push : {watchingIssues : newIssueDetails.issueId}}, (err, result)=>{
-                if(err){
+    let addIssueToWatchList = (newIssueDetails) => {
+        return new Promise((resolve, reject) => {
+            userModel.findOneAndUpdate({ userId: req.user.userId }, { $push: { watchingIssues: newIssueDetails.issueId } }, (err, result) => {
+                if (err) {
                     logger.error("error updating new issue to reporter issue watchlist", "issueController : createNewIssue - addIssueToWatchList(reporter)", 9);
                     let apiResponse = response.generate(true, "error while updating new issue to reporter issue watchlist", 500, err);
                     reject(apiResponse);
-                }else if(check.isEmpty(result)){
+                } else if (check.isEmpty(result)) {
                     logger.error("reporter detial not found to update the watchlist", "issueController : createNewIssue - addIssueToWatchList(reporter)", 9);
                     let apiResponse = response.generate(true, "reporter details not found to update the issue", 404, null);
                     reject(apiResponse);
-                }else{
+                } else {
                     let updateObj = {
-                        $push : {watchingIssues : newIssueDetails.issueId, assignedIssues : newIssueDetails.issueId}                            
+                        $push: { watchingIssues: newIssueDetails.issueId, assignedIssues: newIssueDetails.issueId }
                     }
-                    userModel.findOneAndUpdate({userId : req.body.assignedToId}, updateObj, (err, assignResult)=>{
-                        if(err){
+                    userModel.findOneAndUpdate({ userId: req.body.assignedToId }, updateObj, (err, assignResult) => {
+                        if (err) {
                             logger.error("error while adding the new issue to the assigned user", "issueController : createNewIssue - addIssueToWatchList(assignedTo)", 9);
                             let apiResponse = response.generate(true, "error while adding the new issue to assigned user", 500, err);
                             reject(apiResponse);
-                        }else if(check.isEmpty(assignResult)){
+                        } else if (check.isEmpty(assignResult)) {
                             logger.error("user detail to assign the issue not found", "issueController : createNewIssue - addIssueToWatchList(assignedTo)", 9);
                             let apiResponse = response.generate(true, "user details to assign the issue not found", 404, null);
                             reject(apiResponse);
-                        }else{
+                        } else {
                             resolve(newIssueDetails);
                         }
                     })
@@ -93,45 +93,45 @@ let createNewIssue = (req, res)=>{
     }
 
     validateInput()
-    .then(creatingIssue)
-    .then(addIssueToWatchList)
-    .then((newIssueDetails)=>{
-        let apiResponse = response.generate(false, "issue created successfully", 200, newIssueDetails);
-        res.send(apiResponse);
-    })
-    .catch((error)=>{
-        res.send(error);
-    })
+        .then(creatingIssue)
+        .then(addIssueToWatchList)
+        .then((newIssueDetails) => {
+            let apiResponse = response.generate(false, "issue created successfully", 200, newIssueDetails);
+            res.send(apiResponse);
+        })
+        .catch((error) => {
+            res.send(error);
+        })
 }
 
 
 //delete issue
-let deleteIssue = (req, res)=>{
+let deleteIssue = (req, res) => {
 
     //find the issue details
-    let findIssue = ()=>{
-        return new Promise((resolve, reject)=>{
+    let findIssue = () => {
+        return new Promise((resolve, reject) => {
             queryObj = {
                 $and: [
-                    {issueId : req.body.issueId},
+                    { issueId: req.body.issueId },
                     {
                         $or: [
-                            {reporterId : req.user.userId},
-                            {assignedId : req.user.userId}
+                            { reporterId: req.user.userId },
+                            { assignedId: req.user.userId }
                         ]
                     }
                 ]
             }
-            issueModel.findOne(queryObj, (err, result)=>{
-                if(err){
+            issueModel.findOne(queryObj, (err, result) => {
+                if (err) {
                     logger.error("error finding the issue details", "issueController : deleteIssue - findIssue", 9);
                     let apiResponse = response.generate(true, "error while finding the issue details to delete", 500, err);
                     reject(apiResponse);
-                }else if(check.isEmpty(result)){
+                } else if (check.isEmpty(result)) {
                     logger.error("issue details not found", "issueController : deleteIssue - findIssue", 9);
                     let apiResponse = response.generate(true, "issue details not found", 404, null);
                     reject(apiResponse);
-                }else{
+                } else {
                     let issueDetails = result.toObject();
                     resolve(issueDetails);
                 }
@@ -140,17 +140,17 @@ let deleteIssue = (req, res)=>{
     }
 
     //removing the issue from assigned user's assignments
-    let deleteFromAssignedUser = (issueDetails)=>{
-        return new Promise((resolve, reject)=>{
+    let deleteFromAssignedUser = (issueDetails) => {
+        return new Promise((resolve, reject) => {
             updateObj = {
-                $pull: {assignedIssues: issueDetails.issueId}                
+                $pull: { assignedIssues: issueDetails.issueId }
             }
-            userModel.findOneAndUpdate({userId : issueDetails.assignedToId}, updateObj, (err, result)=>{
-                if(err){
+            userModel.findOneAndUpdate({ userId: issueDetails.assignedToId }, updateObj, (err, result) => {
+                if (err) {
                     logger.error("error while unassigning the issue", "issueController : deleteIssue - deleteFromAssignedUser", 9);
                     let apiResponse = response.generate(true, "error while unassigning the issue", 500, err);
                     reject(apiResponse);
-                }else{
+                } else {
                     resolve(issueDetails);
                 }
             })
@@ -158,20 +158,20 @@ let deleteIssue = (req, res)=>{
     }
 
     //deleting the issue from all the watchers watching list
-    let deleteFromWatcherList = (issueDetails)=>{
+    let deleteFromWatcherList = (issueDetails) => {
         console.log("deleting from watchers list")
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
             updateObj = {
-                $pull: {watchingIssues: issueDetails.issueId}                
+                $pull: { watchingIssues: issueDetails.issueId }
             }
-            for(let user of issueDetails.watchersId){
-                userModel.findOneAndUpdate({userId : user}, updateObj, (err, result)=>{
-                    if(err){
+            for (let user of issueDetails.watchersId) {
+                userModel.findOneAndUpdate({ userId: user }, updateObj, (err, result) => {
+                    if (err) {
                         logger.error("error while removing the issue from a user's watch list", "issueController : deleteIssue - deleteFromWatcherList", 9);
                         let apiResponse = response.generate(true, "error while removing the issue from a user's watch list", 500, err);
                         reject(apiResponse);
-                    }else{
-                        
+                    } else {
+
                     }
                 })
             }
@@ -180,14 +180,14 @@ let deleteIssue = (req, res)=>{
     }
 
     //deleting the issue details
-    let deletingIssue = (issueDetails)=>{
-        return new Promise((resolve, reject)=>{
-            issueModel.findOneAndDelete({issueId : issueDetails.issueId}, (err, result)=>{
-                if(err){
+    let deletingIssue = (issueDetails) => {
+        return new Promise((resolve, reject) => {
+            issueModel.findOneAndDelete({ issueId: issueDetails.issueId }, (err, result) => {
+                if (err) {
                     logger.error("error while deleting the issue", "issueController : deleteIssue - deletingISsue", 9);
                     let apiResponse = response.generate(true, "error while deleting the issue", 500, err);
-                    reject(apiResponse);                    
-                }else{
+                    reject(apiResponse);
+                } else {
                     let deletedIssue = result.toObject();
                     delete deletedIssue.__v;
                     delete deleteIssue._id;
@@ -196,55 +196,55 @@ let deleteIssue = (req, res)=>{
             })
         })
     }
-    
+
     findIssue()
-    .then(deleteFromAssignedUser)
-    .then(deleteFromWatcherList)
-    .then(deletingIssue)
-    .then((deletedIssue)=>{
-        let apiResponse = response.generate(false, "issue deleted successfully", 200, deletedIssue);
-        res.send(apiResponse);
-    })
-    .catch((error)=>{
-        res.send(error);
-    })
+        .then(deleteFromAssignedUser)
+        .then(deleteFromWatcherList)
+        .then(deletingIssue)
+        .then((deletedIssue) => {
+            let apiResponse = response.generate(false, "issue deleted successfully", 200, deletedIssue);
+            res.send(apiResponse);
+        })
+        .catch((error) => {
+            res.send(error);
+        })
 
 }
 
 //edit issue
-let editIssue = (req, res)=>{
+let editIssue = (req, res) => {
 
     //validating input 
-    let validatingInput = ()=>{
-        return new Promise((resolve, reject)=>{
-            if(check.isEmpty(req.body.issueId)){
+    let validatingInput = () => {
+        return new Promise((resolve, reject) => {
+            if (check.isEmpty(req.body.issueId)) {
                 logger.error("issue information not provided", "issueController : editIssue - validatingInput", 9);
                 let apiResponse = response.generate(true, "details of the issue to edit not valid", 400, null);
                 reject(apiResponse);
             }
-            else{
+            else {
                 resolve();
             }
         })
     }
 
     //edit title or description of the issue
-    let editTitleOrDescription = ()=>{
-        return new Promise((resolve, reject)=>{
+    let editTitleOrDescription = () => {
+        return new Promise((resolve, reject) => {
             let updateObj = {
-                title : req.body.title,
+                title: req.body.title,
                 description: req.body.description
             }
-            issueModel.update({issueId : req.body.issueId}, updateObj, (err, result)=>{
-                if(err){
+            issueModel.update({ issueId: req.body.issueId }, updateObj, (err, result) => {
+                if (err) {
                     logger.error("error editing issue details", "issueController : editIssue - editTitleOrDescription", 9);
                     let apiResponse = response.generate(true, "error editing issue details", 500, err);
                     reject(apiResponse);
-                }else if(check.isEmpty(result)){
+                } else if (check.isEmpty(result)) {
                     logger.error("could not find issue to update", "issueController : editIssue - editTitleOrDescription", 9);
                     let apiResponse = response.generate(true, "issue details not found", 404, null);
                     reject(apiResponse);
-                }else{
+                } else {
                     let updatedIssue = result;
                     resolve(updatedIssue);
                 }
@@ -253,81 +253,138 @@ let editIssue = (req, res)=>{
     }
 
     validatingInput()
-    .then(editTitleOrDescription)
-    .then((updatedIssue)=>{
-        let apiResponse = response.generate(false, "issue details editted successfully", 200, updatedIssue);
-        res.send(apiResponse);
-    })
-    .catch((error)=>{
-        res.send(error);
-    })
+        .then(editTitleOrDescription)
+        .then((updatedIssue) => {
+            let apiResponse = response.generate(false, "issue details editted successfully", 200, updatedIssue);
+            res.send(apiResponse);
+        })
+        .catch((error) => {
+            res.send(error);
+        })
 }
 
 //get all issues
-let getAllIssues = (req, res)=>{
-    issueModel.find()
-    .select('-_id -__v')
+let getAllIssues = (req, res) => {
+    if(req.body.statusFilter){
+        queryObj = {
+            status : req.body.statusFilter
+        }
+    }else{
+        queryObj = {}
+    }
+    issueModel.find(queryObj)
+        .select('-_id -__v')
+        .sort('-createdOn')
+        .skip(parseInt(req.body.skip) || 0)
+        .lean()
+        .limit(10)
+        .exec((err, result) => {
+            if (err) {
+                logger.error("error while retreiving issues", "issueController : getAllIssues", 9);
+                let apiResponse = response.generate(true, "error while retreiving issues", 500, err);
+                res.send(apiResponse);
+            } else if (check.isEmpty(result)) {
+                logger.error("no issues found", "issueController : getAllIssues", 9);
+                let apiResponse = response.generate(true, "issues not found", 404, null);
+                res.send(apiResponse);
+            } else {
+                logger.info("issues retreived successfully", "issueController : getAllIssues", 9);
+                issueModel.countDocuments(queryObj,(err, count)=>{
+                    if(err){
+                        logger.info("unable to get count of total filtered issue", "issueController : getAllIssues-findingCount",9);                        
+                    }else{
+                        let apiResponse = response.generate(false, "issues retreived successfully", 200, result);
+                        apiResponse.count = count;
+                        res.send(apiResponse);
+                    }
+                })
+                
+            }
+        })
+}
+
+//get all the issues assigned to the logged in user
+let getAssignedIssues = (req, res)=>{
+    if(req.body.statusFilter){
+        queryObj = {
+        $and: [
+                {assignedToId : req.user.userId},
+                {status : req.body.statusFilter}
+            ]
+        }
+    }else{
+        queryObj = {assignedToId : req.user.userId}
+    }
+    issueModel.find(queryObj)
+    .select('-__v -_id')
     .sort('-createdOn')
     .skip(parseInt(req.body.skip) || 0)
     .lean()
     .limit(10)
     .exec((err, result)=>{
         if(err){
-            logger.error("error while retreiving issues", "issueController : getAllIssues", 9);
-            let apiResponse = response.generate(true, "error while retreiving issues", 500, err);
+            logger.error("error while retreiving assigned issues", "issueController : getAssignedIssues", 9);
+            let apiResponse = response.generate(true, "error while retreiving assigned issues", 500, err);
             res.send(apiResponse);
         }else if(check.isEmpty(result)){
-            logger.error("no issues found", "issueController : getAllIssues", 9);
-            let apiResponse = response.generate(true, "issues not found", 404, null);
+            logger.error("no assigned issues found", "issueController : getAssignedIssues", 9);
+            let apiResponse = response.generate(true, "no assigned issues found", 404, null);
             res.send(apiResponse);
-        }else{
-            logger.info("issues retreived successfully", "issueController : getAllIssues", 9);
-            let apiResponse = response.generate(false, "issues retreived successfully", 200, result);
-            res.send(apiResponse);
+        }else {
+            logger.info("issues found", "issueController : getAssignedIssues", 9);
+            issueModel.countDocuments(queryObj,(err, count)=>{
+                if(err){
+                    logger.info("unable to get count of total filtered issue", "issueController : getAllIssues-findingCount",9);                        
+                }else{
+                    let apiResponse = response.generate(true, "issues found", 200, result);
+                    apiResponse.count = count;
+                    res.send(apiResponse);
+                }
+            })
         }
     })
 }
 
 //assign issue to user
-let assignIssue = (req, res)=>{
-    
+let assignIssue = (req, res) => {
+
     //finding issue details
-    let findIssue = ()=>{
-        return new Promise((resolve, reject)=>{
-            issueModel.findOne({issueId : req.body.issueId}, (err, result)=>{
-                if(err){
+    let findIssue = () => {
+        return new Promise((resolve, reject) => {
+            issueModel.findOne({ issueId: req.body.issueId }, (err, result) => {
+                if (err) {
                     logger.error("error retrieving issue details", "issueController : assignIssue - findIssue", 9);
                     let apiResponse = response.generate(true, "error while retrieving issue details", 500, err);
                     reject(apiResponse);
-                }else if(check.isEmpty(result)){
+                } else if (check.isEmpty(result)) {
                     logger.error("issue details not found", "issueController : assignIssue - findIssue", 9);
                     let apiResponse = response.generate(true, "issue details not found", 404, null);
                     reject(apiResponse);
-                }else {
+                } else {
                     let issueDetails = result.toObject();
                     resolve(issueDetails);
                 }
             })
         })
     }
-    
+
 
     //updating the previous assigned user
-    let updatePreviousUser = (issueDetails)=>{
-        return new Promise((resolve, reject)=>{
+    let updatePreviousUser = (issueDetails) => {
+        return new Promise((resolve, reject) => {
             let updateObj = {
-                $pull : {assignedIssues : issueDetails.issueId}
+                $pull: { assignedIssues: issueDetails.issueId }
             }
-            userModel.update({userId : issueDetails.assignedToId}, updateObj, (err, result)=>{
-                if(err){
+            userModel.update({ userId: issueDetails.assignedToId }, updateObj, (err, result) => {
+                if (err) {
                     logger.error("error while updating the current user assigned with the issue", "issueController : assignIssue - updatePreviousUser", 9);
                     let apiResponse = response.generate(true, "error while updating the current user assigned with the issue", 500, err);
                     reject(apiResponse);
-                }else if(result.n == 0){
+                } else if (result.n == 0) {
                     logger.error("current assigned user not found", "issueController : assignIssue - updatePreviousUser", 9);
                     let apiResponse = response.generate(true, "current assigned user details not found", 404, null);
                     reject(apiResponse);
-                }else{
+                } else {
                     logger.info("current user un-assigned of the issue", "issueController : assignIssue - updatePreviousUser", 9);
                     resolve(issueDetails);
                 }
@@ -336,21 +393,21 @@ let assignIssue = (req, res)=>{
     }
 
     //assigning new user with the issue
-    let updateNewUser = (issueDetails)=>{
-        return new Promise((resolve, reject)=>{
+    let updateNewUser = (issueDetails) => {
+        return new Promise((resolve, reject) => {
             let updateObj = {
-                $push : {assignedIssues : issueDetails.issueId}
+                $push: { assignedIssues: issueDetails.issueId }
             }
-            userModel.update({userId : req.body.assignToId}, updateObj, (err, result)=>{
-                if(err){
+            userModel.update({ userId: req.body.assignToId }, updateObj, (err, result) => {
+                if (err) {
                     logger.error("error while assigning the issue to user", "issueController : assignIssue - updateNewUser", 9);
                     let apiResponse = response.generate(true, "error while assigning the issue to user", 500, err);
                     reject(apiResponse);
-                }else if(result.n == 0){
+                } else if (result.n == 0) {
                     logger.error("user details not found to assing the issue", "issueController : assignIssue - updateNewUser", 9);
                     let apiResponse = response.generate(true, "user details not found", 404, null);
                     reject(apiResponse);
-                }else{
+                } else {
                     logger.info("new user assigned with the issue", "issueController : assignIssue - updateNewUser", 9);
                     resolve(issueDetails);
                 }
@@ -359,21 +416,21 @@ let assignIssue = (req, res)=>{
     }
 
     //update issue
-    let updateIssue = (issueDetails)=>{
-        return new Promise((resolve, reject)=>{
+    let updateIssue = (issueDetails) => {
+        return new Promise((resolve, reject) => {
             let updateObj = {
-                assignedToId : req.body.assignToId
+                assignedToId: req.body.assignToId
             }
-            issueModel.update({issueId : req.body.issueId}, updateObj, (err, result)=>{
-                if(err){
+            issueModel.update({ issueId: req.body.issueId }, updateObj, (err, result) => {
+                if (err) {
                     logger.error("error assigning the issue to another user", "issueController : assignIssue", 9);
                     let apiResponse = response.generate(true, "error while assigning the issue to another user", 500, err);
                     reject(apiResponse);
-                }else if(result.n == 0){
+                } else if (result.n == 0) {
                     logger.error("issue details not found", "issueController : assigningIssue", 9);
                     let apiResponse = response.generate(true, "issue details not found", 404, null);
                     reject(apiResponse);
-                }else {
+                } else {
                     logger.info("issue successfully reassigned", "issueController : assignIssue - updateIssue", 9);
                     resolve(result);
                 }
@@ -382,37 +439,37 @@ let assignIssue = (req, res)=>{
     }
 
     findIssue()
-    .then(updatePreviousUser)
-    .then(updateNewUser)
-    .then(updateIssue)
-    .then((result)=>{
-        let apiResponse = response.generate(false, "issue successfully assigned to user", 200, result);
-        res.send(apiResponse);
-    })
-    .catch((error)=>{
-        res.send(error);
-    })
+        .then(updatePreviousUser)
+        .then(updateNewUser)
+        .then(updateIssue)
+        .then((result) => {
+            let apiResponse = response.generate(false, "issue successfully assigned to user", 200, result);
+            res.send(apiResponse);
+        })
+        .catch((error) => {
+            res.send(error);
+        })
 }
 
 //add issue to current user's watch list
-let watchIssue = (req, res)=>{
+let watchIssue = (req, res) => {
 
     //add to user's watch list
-    let addToWatchList = ()=>{
-        return new Promise((resolve, reject)=>{
+    let addToWatchList = () => {
+        return new Promise((resolve, reject) => {
             let updateObj = {
-                $push : {watchingIssues : req.body.issueId}
+                $push: { watchingIssues: req.body.issueId }
             }
-            userModel.updateOne({userId : req.user.userId}, updateObj, (err, result)=>{
-                if(err){
+            userModel.updateOne({ userId: req.user.userId }, updateObj, (err, result) => {
+                if (err) {
                     logger.error("error while updating users watchlist", "issueController : watchIssue - addToWatchList", 9);
                     let apiResponse = response.generate(true, "error while updating users watchlist", 500, err);
                     reject(apiResponse);
-                }else if(result.n == 0){
+                } else if (result.n == 0) {
                     logger.error("user details not found", "issueController : watchIssue - addToWatchList", 9);
                     let apiResponse = response.generate(true, "user details not found", 404, null);
                     reject(apiResponse);
-                }else{
+                } else {
                     logger.info("updated user's watchlist", "issueController : watchIssue - addToWatchList", 9);
                     resolve();
                 }
@@ -421,21 +478,21 @@ let watchIssue = (req, res)=>{
     }
 
     //add user details to issue's watcher list
-    let addUserToIssue = ()=>{
-        return new Promise((resolve, reject)=>{
+    let addUserToIssue = () => {
+        return new Promise((resolve, reject) => {
             let updateObj = {
-                $push : {watchersId : req.user.userId}
+                $push: { watchersId: req.user.userId }
             }
-            issueModel.updateOne({issueId : req.body.issueId}, updateObj, (err, result)=>{
-                if(err){
+            issueModel.updateOne({ issueId: req.body.issueId }, updateObj, (err, result) => {
+                if (err) {
                     logger.error("error while adding the user to the watcher list of the issue", "issueController : watchIssue - addUserToIssue", 9);
                     let apiResponse = response.generate(true, "error while adding the user to the watcher list of the issue", 500, err);
                     reject(apiResponse);
-                }else if(result.n == 0){
+                } else if (result.n == 0) {
                     logger.error("issue details not found", "issueController : watchIssue - addUserToIssue", 9);
                     let apiResponse = response.generate(true, "issue details not found", 404, null);
                     reject(apiResponse);
-                }else{
+                } else {
                     logger.info("updated watchers list of the issue", "issueController : watchIssue - addUserToIssue", 9);
                     resolve(result);
                 }
@@ -444,28 +501,28 @@ let watchIssue = (req, res)=>{
     }
 
     addToWatchList()
-    .then(addUserToIssue)
-    .then((result)=>{
-        let apiResponse = response.generate(false, "issue added to watch list successfully", 200, result);
-        res.send(apiResponse);
-    })
-    .catch((error)=>{
-        res.send(error);
-    })
+        .then(addUserToIssue)
+        .then((result) => {
+            let apiResponse = response.generate(false, "issue added to watch list successfully", 200, result);
+            res.send(apiResponse);
+        })
+        .catch((error) => {
+            res.send(error);
+        })
 }
 
 //change issue status
-let changeIssueStatus = (req, res)=>{
-    issueModel.updateOne({issueId: req.body.issueId},{status : req.body.newStatus}, (err,result)=>{
-        if(err){
+let changeIssueStatus = (req, res) => {
+    issueModel.updateOne({ issueId: req.body.issueId }, { status: req.body.newStatus }, (err, result) => {
+        if (err) {
             logger.error("error while updating the status of issue", "issueController : changeIssueStatus", 9);
             let apiResponse = response.generate(true, "error while updating the status", 500, err);
             res.send(apiResponse);
-        }else if(result.n == 0){
+        } else if (result.n == 0) {
             logger.error("issue details not found to update status", "issueController : changeIssueStatus", 9);
             let apiResponse = response.generate(true, "issue details not found to update", 404, null);
             res.send(apiResponse);
-        }else{
+        } else {
             logger.info("issue status updated successfully", "issueController: changeIssueStatus", 9);
             let apiResponse = response.generate(false, "issue status updated successfully", 200, result);
             res.send(apiResponse);
@@ -473,13 +530,196 @@ let changeIssueStatus = (req, res)=>{
     })
 }
 
+//search for issue title
+let searchIssueTitle = (req, res) => {
+    let searchQuery = `"\"${req.body.searchString}\""`
+    let queryObj = {
+        $text: { $search: searchQuery }
+    }
+    issueModel.find(queryObj)
+        .select('-__v -_id')
+        .sort('-createdOn')
+        .lean()
+        .exec((err, result) => {
+            if (err) {
+                logger.error("error while searching for given input", "issueController : searchIssueTitle", 9);
+                let apiResponse = response.generate(true, "error while searching for given input", 500, err);
+                res.send(apiResponse);
+            } else if (check.isEmpty(result)) {
+                logger.error("no such issues found", "issueController : searchIssueTitle", 9);
+                let apiResponse = response.generate(true, "no such issues found", 404, null);
+                res.send(apiResponse);
+            } else {
+                logger.info("issues retreived", "issueController : searchIssueTitle", 9);
+                let apiResponse = response.generate(false, "issue title found", 200, result);
+                res.send(apiResponse);
+            }
+        })
+
+}
+
+
+
+
+//create a new comment on an issue
+let createNewComment = (req, res) => {
+
+    //create comment
+    let createComment = () => {
+        return new Promise((resolve, reject) => {
+            let newComment = new commentModel({
+                commentId: shortId.generate(),
+                commenterId: req.user.userId,
+                createdOn: time.localTimeNow(),
+                comment: req.body.comment,
+                issueId: req.body.issueId
+            })
+            newComment.save((err, result) => {
+                if (err) {
+                    logger.error("error while saving new comment", "issueController : createNewComment - createComment", 9);
+                    let apiResponse = response.generate(true, "error while saving new comment", 500, err);
+                    reject(apiResponse);
+                } else {
+                    let commentDetails = result.toObject();
+                    delete commentDetails.__v;
+                    delete commentDetails._id;
+                    resolve(commentDetails);
+                }
+            })
+        })
+    }
+
+    //add comment details to issue
+    let addCommentToIssue = (commentDetails) => {
+        return new Promise((resolve, reject) => {
+            issueModel.update({ issueId: req.body.issueId }, { $push: { commentsId: commentDetails.commentId } }, (err, result) => {
+                if (err) {
+                    logger.error("error while adding comment to the issue", "issueController : createNewComment - addCommentToIssue", 9);
+                    let apiResponse = response.generate(true, "error while adding comment to the issue", 500, err);
+                    reject(apiResponse);
+                } else if (result.n == 0) {
+                    logger.error("issue details not found to add comment", "issueController : createNewComment - addCommentToIssue", 9);
+                    let apiResponse = response.generate(true, "issue details not found to add comment", 404, null);
+                    reject(apiResponse);
+                } else {
+                    logger.info("comment added to the issue", "issueController : createNewComment - addCommentToIssue", 9);
+                    resolve(commentDetails);
+                }
+            })
+        })
+    }
+
+    createComment()
+        .then(addCommentToIssue)
+        .then((commentDetails) => {
+            let apiResponse = response.generate(false, "comment created successfully", 200, commentDetails);
+            res.send(apiResponse);
+        })
+        .catch((error) => {
+            res.send(error);
+        })
+}
+
+// get all the comments of the issue
+let getIssueComments = (req, res) => {
+    commentModel.find({ issueId: req.body.issueId })
+        .select('-__v -_id')
+        .sort('-createdOn')
+        .skip(parseInt(req.body.skip) || 0)
+        .lean()
+        .limit(10)
+        .exec((err, result) => {
+            if (err) {
+                logger.error("error while retreiving comments", "issueController : getIssueComments", 9);
+                let apiResponse = response.generate(true, "error while retreiving comments", 500, err);
+                res.send(apiResponse);
+            } else if (check.isEmpty(result)) {
+                logger.error("no comments found on issue", "issueController : getIssueComments", 9);
+                let apiResponse = response.generate(true, "no comments found on issue", 404, null);
+                res.send(apiResponse);
+            } else {
+                console.log(result);
+                logger.info("comments retreived successfully", "issueController : getIssueCommens", 9);
+                let apiResponse = response.generate(false, "comments retreived successfully", 200, result);
+                res.send(apiResponse);
+            }
+        })
+}
+
+//delete comment made by user logged in
+let deleteComment = (req, res)=>{
+    
+    //delete comment
+    let deletingComment = ()=>{
+        return new Promise((resolve, reject)=>{
+            let queryObj = {                
+                commentId : req.body.commentId                
+            }
+            commentModel.findOneAndDelete(queryObj, (err, result)=>{
+                if(err){
+                    logger.error("error while deleting comment", "issueController : deleteComment - deletingcomment", 9);
+                    let apiResponse = response.generate(true, "error while deleting comment", 500, err);
+                    reject(apiResponse);
+                }else if(check.isEmpty(result)){
+                    logger.error("comment not found", "issueController : deleteComment - deletingcomment", 9);
+                    let apiResponse = response.generate(true, "comment not found", 404, null);
+                    reject(apiResponse);
+                }else if(result.commenterId == req.user.userId){
+                    logger.error("cannot delete others comments", "issueController : deleteComment - deletingComment", 9);
+                    let apiResponse = response.generate(true, "cannot delete others comments", 400, null);
+                    reject(apiResponse)
+                }else{                    
+                    let commentDetails = result.toObject();
+                    delete commentDetails.__v;
+                    delete commentDetails._id;
+                    resolve(commentDetails);
+                }
+            })
+        })
+    }
+
+    //deleting comment details from issue
+    let deleteCommentDetails = (commentDetails)=>{
+        return new Promise((resolve, reject)=>{
+            let queryObj = {
+                issueId : commentDetails.issueId
+            }
+            let updateObj = {
+                $pull : {commentsId : commentDetails.commentId}
+            }
+            issueModel.updateOne(queryObj, updateObj, (err, result)=>{
+                if(err){
+                    logger.error("error removing comment details from issue", "issueController : deleteComment - deleteCommentDetails", 9);
+                    let apiResponse = response.generate(true, "error while removing comment details from issue", 500, err);
+                    reject(apiResponse);
+                }else if(result.n == 0){
+                    logger.error("issue not found to remove comment", "issueController : deleteComment - deleteCommentDetails", 9);
+                    let apiResponse = response.generate(true, "issue not found to remove comment", 404, null);
+                    reject(apiResponse);
+                }else {
+                    resolve(commentDetails);
+                }
+            })
+        })
+    }
+
+    deletingComment()
+    .then(deleteCommentDetails)
+    .then((commentDetails)=>{
+        let apiResponse = response.generate(false, "comment deleted successfully", 200, commentDetails);
+        res.send(apiResponse);
+    })
+    .catch((error)=>{
+        res.send(error);
+    })
+}
 
 //testing delete issue
-let testDeleteIssue = (req, res)=>{
-    issueModel.findOneAndDelete({issueId : req.body.issueId}, (err, result)=>{
-        if(err){
+let testDeleteIssue = (req, res) => {
+    issueModel.findOneAndDelete({ issueId: req.body.issueId }, (err, result) => {
+        if (err) {
             res.send(err)
-        }else{
+        } else {
             res.send(result);
         }
     })
@@ -487,12 +727,17 @@ let testDeleteIssue = (req, res)=>{
 
 
 module.exports = {
-    createIssue : createNewIssue,
-    deleteIssue : deleteIssue,
-    editIssue : editIssue,
-    getAllIssues : getAllIssues,
-    testDeleteIssue : testDeleteIssue,
-    assignIssue : assignIssue,
-    watchIssue : watchIssue,
-    changeIssueStatus : changeIssueStatus
+    createIssue: createNewIssue,
+    deleteIssue: deleteIssue,
+    editIssue: editIssue,
+    getAllIssues: getAllIssues,
+    getAssignedIssues : getAssignedIssues,
+    testDeleteIssue: testDeleteIssue,
+    assignIssue: assignIssue,
+    watchIssue: watchIssue,
+    changeIssueStatus: changeIssueStatus,
+    createNewComment: createNewComment,
+    getIssueComments: getIssueComments,
+    searchIssueTitle: searchIssueTitle,
+    deleteComment : deleteComment
 }

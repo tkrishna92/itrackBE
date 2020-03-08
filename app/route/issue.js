@@ -52,7 +52,7 @@ let setRouter = (app) =>{
     
     //getAllIssues
     //queryParams : authToken to be passed as body, query or header parameter
-    app.get(`${baseUrl}/getAllIssues`, auth.isAuthenticated, controller.getAllIssues);
+    app.put(`${baseUrl}/getAllIssues`, auth.isAuthenticated, controller.getAllIssues);
 
     /**
      * @api {post} /issues/getAllIssues get all issues
@@ -61,26 +61,46 @@ let setRouter = (app) =>{
      * 
      * @apiParam {String} authToken authToken to be passed as body, query or header parameter
      * @apiParam {String} skip integer value of number of issues to be displayed to be passed as a body parameter
+     * @apiParam {String} statusFilter status filter to apply for getting issues to be passed as a body parameter
      * 
      * @apiSuccessExample {json} Success-Response:
      * {
             "errorOccurred": false,
-            "message": "issue details editted successfully",
+            "message": "issues retreived successfully",
             "status": 200,
-            "data": {
-                "status": "new",
-                "createdOn": "2020-03-07T12:00:37.000Z",
-                "watchersId": [
-                    "pH4WJZvj",
-                    "TuWUOF5B"
-                ],
-                "commentsId": [],
-                "issueId": "I32rSYeE",
-                "reporterId": "pH4WJZvj",
-                "assignedToId": "TuWUOF5B",
-                "title": "first",
-                "description": "description"
-            }
+            "data": [
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-08T11:09:28.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "PhDPgHgv",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search 2",
+                    "description": "description"
+                },
+                ..
+                ..
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-07T12:33:11.000Z",
+                    "watchersId": [
+                        "pH4WJZvj",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "mYhmiJnj",
+                    "reporterId": "pH4WJZvj",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first edit",
+                    "description": "description edit"
+                }
+            ],
+            "count": 4
         }
      *
      * @apiErrorExample {json} Error-Response:
@@ -91,6 +111,68 @@ let setRouter = (app) =>{
             "data": null
         }
      */
+
+    //getAssignedIssues - gets all the assigned issues of the logged in user
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/getAssignedIssues`, auth.isAuthenticated, controller.getAssignedIssues);
+
+    /**
+     * @api {post} /issues/getAssignedIssues get assigned issues
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} skip integer value of number of issues to be displayed to be passed as a body parameter
+     * @apiParam {String} statusFilter status filter to apply for getting issues to be passed as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issues found",
+            "status": 200,
+            "data": [
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-08T11:09:24.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "krW_aT6d",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search 1",
+                    "description": "description"
+                },
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-08T11:09:19.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "aKy6qo0p",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search",
+                    "description": "description"
+                }
+            ],
+            "count": 2
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "no assigned issues found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+
 
 
     //delete issue
@@ -245,7 +327,7 @@ let setRouter = (app) =>{
         }
      */
 
-     //change issue status
+    //change issue status
     //params : issueId of the issue for which the status is being changed to be passed as body parameter
     //params : newStatus that is being update to be passed as body parameter
     //queryParams : authToken to be passed as body, query or header parameter
@@ -282,8 +364,213 @@ let setRouter = (app) =>{
      */
 
 
+    //search issue titles
+    //params : searchString : search string to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/searchIssueTitle`, auth.isAuthenticated, controller.searchIssueTitle);
 
-    // app.put(`${baseUrl}/testDeleteIssue`, auth.isAuthenticated, controller.testDeleteIssue);
+    /**
+     * @api {post} /issues/searchIssueTitle search issue titles
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} searchString search string for searching the issue title to be passed as body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "issue title found",
+            "status": 200,
+            "data": [
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-08T11:09:28.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "PhDPgHgv",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search 2",
+                    "description": "description"
+                },
+                ...
+                ...
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-08T11:09:19.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "aKy6qo0p",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search",
+                    "description": "description"
+                }
+            ]
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "no such issues found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+    //create comment
+    //params : issueId - of the issue for which comment is being created to be passed as body parameter
+    //params : comment - the comment to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.post(`${baseUrl}/createNewComment`, auth.isAuthenticated, controller.createNewComment);
+
+    /**
+     * @api {post} /issues/createNewComment create new comment
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId issue id of the issue for which the comment is being created to be passed as body parameter
+     * @apiParam {String} comment comment string to be passed as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "comment created successfully",
+            "status": 200,
+            "data": {
+                "createdOn": "2020-03-07T18:24:58.000Z",
+                "commentId": "rsCswDe5",
+                "commenterId": "pH4WJZvj",
+                "comment": "new comment",
+                "issueId": "Zk6ln5Q5"
+            }
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issue details not found to add comment",
+            "status": 404,
+            "data": null
+        }
+     */
+
+    //get all comments of issue
+    //params : issueId - of the issue for which comments are being retreived to be passed as body parameter
+    //params : skip integer which is a multiple of ten whose value defines number of values to skip to be passed as a body parameter optionally
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/getIssueComment`, auth.isAuthenticated, controller.getIssueComments);
+
+    /**
+     * @api {post} /issues/getIssueComment get issue comments
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId issue id of the issue for which the comments are being retreived to be passed as body parameter
+     * @apiParam {String} skip integer which is a multiple of ten whose value defines number of values to skip to be passed as a body parameter optionally
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "comments retreived successfully",
+            "status": 200,
+            "data": [
+                {
+                    "createdOn": "2020-03-07T18:48:27.000Z",
+                    "commentId": "7DwqoazN",
+                    "commenterId": "pH4WJZvj",
+                    "comment": "new comment 3",
+                    "issueId": "Zk6ln5Q5"
+                },
+                {
+                    "createdOn": "2020-03-07T18:48:24.000Z",
+                    "commentId": "w9K9ifyY",
+                    "commenterId": "pH4WJZvj",
+                    "comment": "new comment 2",
+                    "issueId": "Zk6ln5Q5"
+                },
+                {
+                    "createdOn": "2020-03-07T18:24:58.000Z",
+                    "commentId": "rsCswDe5",
+                    "commenterId": "pH4WJZvj",
+                    "comment": "new comment",
+                    "issueId": "Zk6ln5Q5"
+                }
+            ]
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "no comments found on issue",
+            "status": 404,
+            "data": null
+        }
+     */
+
+    //delete a comment
+    //params : commentId - id of comment being deleted to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/deleteComment`, auth.isAuthenticated, controller.deleteComment);
+
+    /**
+     * @api {post} /issues/deleteComment delete comment
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} commentId id of the comment being deleted to be passed as body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "comments retreived successfully",
+            "status": 200,
+            "data": [
+                {
+                    "createdOn": "2020-03-07T18:48:27.000Z",
+                    "commentId": "7DwqoazN",
+                    "commenterId": "pH4WJZvj",
+                    "comment": "new comment 3",
+                    "issueId": "Zk6ln5Q5"
+                },
+                {
+                    "createdOn": "2020-03-07T18:48:24.000Z",
+                    "commentId": "w9K9ifyY",
+                    "commenterId": "pH4WJZvj",
+                    "comment": "new comment 2",
+                    "issueId": "Zk6ln5Q5"
+                },
+                {
+                    "createdOn": "2020-03-07T18:24:58.000Z",
+                    "commentId": "rsCswDe5",
+                    "commenterId": "pH4WJZvj",
+                    "comment": "new comment",
+                    "issueId": "Zk6ln5Q5"
+                }
+            ]
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "no comments found on issue",
+            "status": 404,
+            "data": null
+        }
+     */
+
+    
+     // app.put(`${baseUrl}/testDeleteIssue`, auth.isAuthenticated, controller.testDeleteIssue);
 
 }
 
