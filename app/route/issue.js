@@ -172,6 +172,144 @@ let setRouter = (app) =>{
         }
      */
 
+    //getWatchingIssues - gets all the assigned issues of the logged in user
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/getWatchingIssues`, auth.isAuthenticated, controller.getWatchingIssues);
+
+    /**
+     * @api {post} /issues/getWatchingIssues get watching issues
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} skip integer value of number of issues to be displayed to be passed as a body parameter
+     * @apiParam {String} statusFilter status filter to apply for getting issues to be passed as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "showing watching issues",
+            "status": 200,
+            "data": [
+                {
+                    "status": "in-progress",
+                    "createdOn": "2020-03-08T11:09:28.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "PhDPgHgv",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search 2",
+                    "description": "description"
+                },
+                {
+                    "status": "in-progress",
+                    "createdOn": "2020-03-07T14:28:45.000Z",
+                    "watchersId": [
+                        "pH4WJZvj",
+                        "TuWUOF5B",
+                        "Kzq61Q8u"
+                    ],
+                    "commentsId": [
+                        "rsCswDe5",
+                        "w9K9ifyY",
+                        "7DwqoazN"
+                    ],
+                    "issueId": "Zk6ln5Q5",
+                    "reporterId": "pH4WJZvj",
+                    "assignedToId": "pH4WJZvj",
+                    "title": "first",
+                    "description": "description"
+                }
+            ],
+            "count": 2
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "no watching issues found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+
+    //getReportedIssues - gets all the watched issues of the logged in user
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.put(`${baseUrl}/getReportedIssues`, auth.isAuthenticated, controller.getReportedIssues);
+
+    /**
+     * @api {post} /issues/getReportedIssues get reported issues
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} skip integer value of number of issues to be displayed to be passed as a body parameter
+     * @apiParam {String} statusFilter status filter to apply for getting issues to be passed as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+            "errorOccurred": false,
+            "message": "showing reported issues",
+            "status": 200,
+            "data": [
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-08T11:09:24.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [],
+                    "issueId": "krW_aT6d",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search 1",
+                    "description": "description"
+                },
+                {
+                    "status": "new",
+                    "createdOn": "2020-03-08T11:09:19.000Z",
+                    "watchersId": [
+                        "Kzq61Q8u",
+                        "TuWUOF5B"
+                    ],
+                    "commentsId": [
+                        "ALjnTVhh",
+                        "T878fwym",
+                        "PiJW1pqK",
+                        "o-5CNqIF",
+                        "uqHZzvQP",
+                        "HZjsa40B",
+                        "__K2nvd4",
+                        "YeRqTDKB",
+                        "58-AqyB6",
+                        "4sqF-oKn",
+                        "zPn5cRtZ",
+                        "FydeBzbn"
+                    ],
+                    "issueId": "aKy6qo0p",
+                    "reporterId": "Kzq61Q8u",
+                    "assignedToId": "TuWUOF5B",
+                    "title": "first search",
+                    "description": "description"
+                }
+            ],
+            "count": 2
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "no reported issues found",
+            "status": 404,
+            "data": null
+        }
+     */
 
 
 
@@ -533,38 +671,22 @@ let setRouter = (app) =>{
      * @apiSuccessExample {json} Success-Response:
      * {
             "errorOccurred": false,
-            "message": "comments retreived successfully",
+            "message": "comment deleted successfully",
             "status": 200,
-            "data": [
-                {
-                    "createdOn": "2020-03-07T18:48:27.000Z",
-                    "commentId": "7DwqoazN",
-                    "commenterId": "pH4WJZvj",
-                    "comment": "new comment 3",
-                    "issueId": "Zk6ln5Q5"
-                },
-                {
-                    "createdOn": "2020-03-07T18:48:24.000Z",
-                    "commentId": "w9K9ifyY",
-                    "commenterId": "pH4WJZvj",
-                    "comment": "new comment 2",
-                    "issueId": "Zk6ln5Q5"
-                },
-                {
-                    "createdOn": "2020-03-07T18:24:58.000Z",
-                    "commentId": "rsCswDe5",
-                    "commenterId": "pH4WJZvj",
-                    "comment": "new comment",
-                    "issueId": "Zk6ln5Q5"
-                }
-            ]
+            "data": {
+                "createdOn": "2020-03-09T09:13:47.000Z",
+                "commentId": "1K8HU9EM",
+                "commenterId": "TuWUOF5B",
+                "comment": "new comment 1",
+                "issueId": "aKy6qo0p"
+            }
         }
      *
      * @apiErrorExample {json} Error-Response:
      * {
             "errorOccurred": true,
-            "message": "no comments found on issue",
-            "status": 404,
+            "message": "cannot delete others comments",
+            "status": 400,
             "data": null
         }
      */

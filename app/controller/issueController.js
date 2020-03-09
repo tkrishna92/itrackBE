@@ -345,6 +345,90 @@ let getAssignedIssues = (req, res)=>{
     })
 }
 
+//get watching issues of logged in user
+let getWatchingIssues = (req, res)=>{
+    if(req.body.statusFilter){
+        queryObj = {
+        $and: [
+                {watchersId : req.user.userId},
+                {status : req.body.statusFilter}
+            ]
+        }
+    }else{
+        queryObj = {watchersId : req.user.userId}
+    }
+    issueModel.find(queryObj)
+    .select('-__v -_id')
+    .sort('-createdOn')
+    .skip(parseInt(req.body.skip) || 0)
+    .lean()
+    .limit(10)
+    .exec((err, result)=>{
+        if(err){
+            logger.error("error while retreiving user watching issues", "issueController : getWatchingIssue", 9);
+            let apiResponse = response.generate(true, "error while retreiving your watched issues", 500, err);
+            res.send(apiResponse);
+        }else if(check.isEmpty(result)){
+            logger.error("no watching issues found", "issueController : getWatchingIssues", 9);
+            let apiResponse = response.generate(true, "no watching issues found", 404, null);
+            res.send(apiResponse);
+        }else{
+            logger.info("successfully retreived watching issues", "issueController : getWatchingIssues", 9);
+            issueModel.countDocuments(queryObj,(err, count)=>{
+                if(err){
+                    logger.info("unable to get count of total filtered issue", "issueController : getWatchingIssues-findingCount",9);                        
+                }else{
+                    let apiResponse = response.generate(false, "showing watching issues", 200, result);
+                    apiResponse.count = count;
+                    res.send(apiResponse);
+                }
+            })            
+        }
+    })
+}
+
+//get issues reported by user
+let getReportedIssues = (req, res)=>{
+    if(req.body.statusFilter){
+        queryObj = {
+        $and: [
+                {reporterId : req.user.userId},
+                {status : req.body.statusFilter}
+            ]
+        }
+    }else{
+        queryObj = {reporterId : req.user.userId}
+    }
+    issueModel.find(queryObj)
+    .select('-__v -_id')
+    .sort('-createdOn')
+    .skip(parseInt(req.body.skip) || 0)
+    .lean()
+    .limit(10)
+    .exec((err, result)=>{
+        if(err){
+            logger.error("error while retreiving user reported issues", "issueController : getReportedIssues", 9);
+            let apiResponse = response.generate(true, "error while retreiving your reported issues", 500, err);
+            res.send(apiResponse);
+        }else if(check.isEmpty(result)){
+            logger.error("no reported issues found", "issueController : getReportedIssues", 9);
+            let apiResponse = response.generate(true, "no reported issues found", 404, null);
+            res.send(apiResponse);
+        }else{
+            logger.info("successfully retreived reported issues", "issueController : getReportedIssues", 9);
+            issueModel.countDocuments(queryObj,(err, count)=>{
+                if(err){
+                    logger.info("unable to get count of total filtered issue", "issueController : getReportedIssues-findingCount",9);                        
+                }else{
+                    let apiResponse = response.generate(false, "showing reported issues", 200, result);
+                    apiResponse.count = count;
+                    res.send(apiResponse);
+                }
+            })            
+        }
+    })
+}
+
 //assign issue to user
 let assignIssue = (req, res) => {
 
@@ -664,7 +748,7 @@ let deleteComment = (req, res)=>{
                     logger.error("comment not found", "issueController : deleteComment - deletingcomment", 9);
                     let apiResponse = response.generate(true, "comment not found", 404, null);
                     reject(apiResponse);
-                }else if(result.commenterId == req.user.userId){
+                }else if(result.commenterId !== req.user.userId){
                     logger.error("cannot delete others comments", "issueController : deleteComment - deletingComment", 9);
                     let apiResponse = response.generate(true, "cannot delete others comments", 400, null);
                     reject(apiResponse)
@@ -732,6 +816,8 @@ module.exports = {
     editIssue: editIssue,
     getAllIssues: getAllIssues,
     getAssignedIssues : getAssignedIssues,
+    getWatchingIssues : getWatchingIssues,
+    getReportedIssues : getReportedIssues,
     testDeleteIssue: testDeleteIssue,
     assignIssue: assignIssue,
     watchIssue: watchIssue,
