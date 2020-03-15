@@ -49,7 +49,52 @@ let setRouter = (app) =>{
             "data": null
         }
      */
-    
+
+
+    //getSingleIssue
+    //queryParams : authToken to be passed as body, query or header parameter
+    //params : issueId : issue id of the issue for which the details are being requested for to be passed as a body parameter
+    app.put(`${baseUrl}/getSingleIssue`, auth.isAuthenticated, controller.getSingleIssue);
+
+    /**
+     * @api {post} /issues/getSingleIssue get single issue
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} issueId id of the issue being queried to be passed as a body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+                    errorOccurred: false
+                    message: "showing selected issue"
+                    status: 200
+                    data:
+                    status: "new"
+                    createdOn: "2020-03-12T17:47:49.000Z"
+                    watchersId: (4) ["pH4WJZvj", "DrGeEuAI", "TuWUOF5B", "QafCGGqX"]
+                    commentsId: ["cElLlwss"]
+                    issueId: "kCmDioqD"
+                    reporterId: "pH4WJZvj"
+                    assignedToId: "DrGeEuAI"
+                    title: "new issue 2 edit"
+                    description: "description of new
+                }
+            ],
+            "count": 4
+        }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * {
+            "errorOccurred": true,
+            "message": "issues not found",
+            "status": 404,
+            "data": null
+        }
+     */
+
+
+
     //getAllIssues
     //queryParams : authToken to be passed as body, query or header parameter
     app.put(`${baseUrl}/getAllIssues`, auth.isAuthenticated, controller.getAllIssues);

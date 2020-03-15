@@ -263,6 +263,31 @@ let editIssue = (req, res) => {
         })
 }
 
+//get single issue details
+let getSingleIssue = (req, res)=>{
+    issueModel.findOne({issueId : req.body.issueId})
+    .lean()
+    .exec((err, result)=>{
+        if(err){
+            logger.error("error retreiving selected issue", "issueController : getSingleIssue", 9);
+            let apiResponse = response.generate(true, "error whilre retreiving selected issue", 500, err);
+            res.send(apiResponse);
+        }else if(check.isEmpty(result)){
+            logger.error("issue details not found", "issueController : getSingleIssue", 9);
+            let apiResponse = response.generate(true, "issue details not found", 404, null);
+            res.send(apiResponse);
+        }else{
+            logger.info("issue details retreived successfully", "issueController : getSingleIssue", 9);
+            let issueDetails = result;
+            delete issueDetails.__v;
+            delete issueDetails._id;
+            let apiResponse = response.generate(false, "showing selected issue", 200, issueDetails);
+            apiResponse["count"] = 0;
+            res.send(apiResponse);
+        }
+    })
+}
+
 //get all issues
 let getAllIssues = (req, res) => {
     if(req.body.statusFilter){
@@ -825,5 +850,6 @@ module.exports = {
     createNewComment: createNewComment,
     getIssueComments: getIssueComments,
     searchIssueTitle: searchIssueTitle,
-    deleteComment : deleteComment
+    deleteComment : deleteComment,
+    getSingleIssue : getSingleIssue
 }

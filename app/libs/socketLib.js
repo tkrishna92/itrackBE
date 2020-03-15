@@ -58,23 +58,28 @@ let setServer = (server)=>{
             socket.to(issueId).broadcast.emit('action-notification', data);
         })
 
-        //on disconnect leave all the group rooms the user is a part of
-        // socket.on('disconnect', ()=>{
-        //    groupModel.find({groupUsers : socket.email})
-        //     .lean()
-        //     .exec((err, result)=>{
-        //         if(err){
-        //             logger.error("error while retreiving groups of users", "socketLib : on disconnect event - while retreiving user groups", 9);
-        //             socket.emit("error-occurred", {status : 500, error : "unable to disconnect from group notifications"})
-        //         }else if(check.isEmpty(result)){
-        //             logger.info("user has not joined any group rooms", "socketLib : on disconnect event - while retreiving user groups", 9);
-        //         }else {
-        //             result.map((group)=>{
-        //                 socket.leave(group.groupId);
-        //             })
-        //         }
-        //     })
-        // })
+       // on disconnect leave all the issue rooms the user is watching
+        socket.on('disconnect', ()=>{
+            console.log("received disconnect event")
+            console.log(socket.userId);
+           userModel.find({userId : socket.userId})
+            .lean()
+            .exec((err, result)=>{
+                console.log(result);
+                if(err){
+                    logger.error("error while retreiving users watch list", "socketLib : on disconnect event - while retreiving user watch list", 9);
+                    socket.emit("error-occurred", {status : 500, error : "unable to disconnect from issue notifications"})
+                }else if(check.isEmpty(result)){
+                    logger.info("user is not watching any issues", "socketLib : on disconnect event - while retreiving user watch list", 9);
+                }else {
+                    console.log(result);
+                    result[0].watchingIssues.map((issue)=>{
+                        console.log("leaving issue room : "+issue);
+                        socket.leave(issue);
+                    })
+                }
+            })
+        })
 
     })
 }
