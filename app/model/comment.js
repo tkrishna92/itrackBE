@@ -6,7 +6,8 @@ let CommentSchema = new Schema({
     commenterId : {type : String},
     createdOn : { type : Date, default : Date.now()},
     comment : { type : String},
-    issueId : { type : String}
+    issueId : { type : String},
+    filesId : {type : [], default : []}
 })
 
 mongoose.model('Comment', CommentSchema)

@@ -1,6 +1,9 @@
 //external modules
 const mongoose = require('mongoose');
 const shortId = require('shortid');
+const path = require('path');
+const mime = require('mime');
+const fs = require('fs');
 
 //libraries
 const check = require('./../libs/checkLib');
@@ -9,10 +12,12 @@ const response = require('./../libs/responseLib');
 const time = require('./../libs/timeLib');
 const token = require('./../libs/tokenLib');
 
+
 //models
 const userModel = mongoose.model('User');
 const issueModel = mongoose.model('Issue');
 const commentModel = mongoose.model('Comment');
+const fileModel = mongoose.model('Files');
 
 // create a new issue
 let createNewIssue = (req, res) => {
@@ -823,6 +828,143 @@ let deleteComment = (req, res)=>{
     })
 }
 
+//save file info
+let saveFileInfo = (req, res)=>{
+
+    //saving file info
+    let savingFileInfo = ()=>{
+        return new Promise((resolve, reject)=>{
+            if(!req.files || Object.keys(req.files).length === 0){
+                logger.error("no files were uploaded", "issueController : saveFileInfo - savingFileInfo", 9);
+                let apiResponse = response.generate(true, "no files were uploaded", 400, null);
+                reject(apiResponse);
+            }else{
+                let currentFile = req.files.uploadedFile;
+                let newFile = new fileModel({
+                    fileId : shortId.generate(),
+                    fileFor : req.query.fileFor,
+                    fileForId : req.query.fileForId,
+                    fileName : currentFile.name                    
+                })
+                newFile.save((err,result)=>{
+                    if(err){
+                        logger.error("error while saving new file information", "issueContoller : saveFileInfo-savingFileInfo", 9);
+                        let apiResponse = response.generate(true, "error while saving new file info", 500, err);
+                        reject(apiResponse);
+                    }else{
+                        let fileInfo = result.toObject();
+                        delete fileInfo.__v;
+                        delete fileInfo._id;
+                        resolve(fileInfo);
+                    }
+                })
+            }
+        })
+    }
+
+    //save file info on issue or comment based on input
+    let saveFileInfoOnFileFor = (fileInfo)=>{
+        return new Promise((resolve, reject)=>{
+            if(fileInfo.fileFor == "comment"){
+                commentModel.findOneAndUpdate({commentId : fileInfo.fileForId}, {$push : {filesId : fileInfo.fileId}}, (err,result)=>{
+                    if(err){
+                        logger.error("error while saving file info to comment", "issueController : saveFileInfo - saveFileInfoOnFileFor(comment)", 9);
+                        let apiResponse = response.generate(true, "error while saving file infor to comment", 500, err);
+                        reject(apiResponse);
+                    }else if(check.isEmpty(result)){
+                        logger.error("comment details not found", "issueController : saveFileInfo - saveFileInfoOnFileFor(comment)", 9);
+                        let apiResponse = response.generate(true, "comment details not found to save file", 404, null);
+                        reject(apiResponse);
+                    }else{
+                        resolve(fileInfo);
+                    }
+                })
+            }else if(fileInfo.fileFor == "issue"){
+                issueModel.findOneAndUpdate({issueId : fileInfo.fileForId}, {$push : {filesId : fileInfo.fileId}}, (err,result)=>{
+                    if(err){
+                        logger.error("error while saving file info to issue", "issueController : saveFileInfo - saveFileInfoOnFileFor(issue)", 9);
+                        let apiResponse = response.generate(true, "error while saving file infor to issue", 500, err);
+                        reject(apiResponse);
+                    }else if(check.isEmpty(result)){
+                        logger.error("issue details not found", "issueController : saveFileInfo - saveFileInfoOnFileFor(issue)", 9);
+                        let apiResponse = response.generate(true, "issue details not found to save file", 404, null);
+                        reject(apiResponse);
+                    }else{
+                        resolve(fileInfo);
+                    }
+                })
+            }
+        })
+    }
+
+    //save file on server
+    let saveFileOnServer = (fileInfo)=>{
+        return new Promise((resolve, reject)=>{
+            let currentFile = req.files.uploadedFile;
+            currentFile.mv(`./app/files/${fileInfo.fileId}${fileInfo.fileName}`,(err)=>{
+                if(err){
+                    logger.error("error while saving the file on server", "issueController : saveFileInfo - saveFileOnServer", 9);
+                    let apiResponse = response.generate(true, "error while saving the file on server", 500, err);
+                    reject(apiResponse);
+                }else{
+                    resolve(fileInfo);
+                }
+            })
+        })
+    }
+
+
+
+    savingFileInfo()
+    .then(saveFileInfoOnFileFor)
+    .then(saveFileOnServer)
+    .then((fileData)=>{
+        let apiResponse = response.generate(false, "file saved successfully", 200, fileData);
+        res.send(apiResponse);
+    })
+    .catch((error)=>{
+        res.send(error);
+    })
+
+}
+
+//get all files details 
+let getAllFiles = (req, res)=>{
+    fileModel.find()
+    .lean()
+    .exec((err, result)=>{
+        if(err){
+            logger.error("error finding files", "issueController : getAllFiles", 9);
+            let apiResponse = response.generate(true, "error finding files", 500, err);
+            res.send(apiResponse);
+        }else if(check.isEmpty(result)){
+            logger.error("no files found", "issueController : getAllFiles", 9);
+            let apiResponse = response.generate(true, "no issues found", 404, null);
+            res.send(apiResponse);
+        }else {
+            logger.info("files info retreived successfully", "issueController : getAllFiles", 9);
+            let apiResponse = response.generate(false, "files info retreived successfully", 200, result);
+            res.send(apiResponse);
+        }
+    })
+}
+
+//downloading file
+let downloadFile = (req, res)=>{
+    let fileName = `${req.query.fileId}${req.query.fileName}`
+    let file = `./app/files/${fileName}`;
+    let name = path.basename(file);
+    let mimetype = mime.getType(file);
+    res.setHeader('Content-disposition', 'attachment; filename='+name);
+    res.setHeader('Content-type', mimetype);
+    let filestream = fs.createReadStream(file);
+    console.log(filestream);
+    filestream.pipe(res);
+    // let fileName = `${req.query.fileId}${req.query.fileName}`
+    // const file = `./app/files/${fileName}`;
+    // res.sendFile(file);
+}
+
 //testing delete issue
 let testDeleteIssue = (req, res) => {
     issueModel.findOneAndDelete({ issueId: req.body.issueId }, (err, result) => {
@@ -851,5 +993,8 @@ module.exports = {
     getIssueComments: getIssueComments,
     searchIssueTitle: searchIssueTitle,
     deleteComment : deleteComment,
-    getSingleIssue : getSingleIssue
+    getSingleIssue : getSingleIssue,
+    saveFileInfo : saveFileInfo,
+    getAllFiles : getAllFiles,
+    downloadFile : downloadFile
 }

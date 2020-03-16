@@ -10,7 +10,8 @@ let IssueSchema = new Schema({
     title : { type : String, index : "text"},
     description : {type : String, index: "text"},
     watchersId : { type : [], default : []},
-    commentsId : { type : [], default : []}
+    commentsId : { type : [], default : []},
+    filesId : {type : [], default : []}
 })
 
 mongoose.model('Issue', IssueSchema)

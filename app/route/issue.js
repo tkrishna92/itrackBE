@@ -737,6 +737,97 @@ let setRouter = (app) =>{
      */
 
     
+    //save file info
+    //params : commentId - id of comment being deleted to be passed as body parameter
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.post(`${baseUrl}/saveFileInfo`, auth.isAuthenticated, controller.saveFileInfo);
+
+    /**
+     * @api {post} /issues/saveFileInfo save file info
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} commentId id of the comment being deleted to be passed as body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+                errorOccurred: false
+                message: "file saved successfully"
+                status: 200
+                data: {
+                    fileId: "yI9JHn63a"
+                    fileFor: "comment"
+                    fileForId: "XljL0obi"
+                    fileName: "reported.png"
+                }
+            }
+        }
+     *
+     * 
+     */
+
+    //get all files info
+    //queryParams : authToken to be passed as body, query or header parameter
+    app.get(`${baseUrl}/getAllFiles`, auth.isAuthenticated, controller.getAllFiles);
+
+    /**
+     * @api {post} /issues/getAllFiles get all files info
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} commentId id of the comment being deleted to be passed as body parameter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+                errorOccurred: false
+                message: "file saved successfully"
+                status: 200
+                data: {
+                    fileId: "yI9JHn63a"
+                    fileFor: "comment"
+                    fileForId: "XljL0obi"
+                    fileName: "reported.png"
+                }
+            }
+        }
+     *
+     * 
+     */
+
+     //download file
+    //queryParams : authToken to be passed as body, query or header parameter
+    //queryParams : fileId and fileName to be passed as query parameters
+    app.get(`${baseUrl}/downloadFile`, auth.isAuthenticated, controller.downloadFile);
+
+    /**
+     * @api {post} /issues/downloadFile download file
+     * @apiVersion 1.0.0
+     * @apiGroup issues
+     * 
+     * @apiParam {String} authToken authToken to be passed as body, query or header parameter
+     * @apiParam {String} fileId id of the the file to be passed as query parameter
+     * @apiParam {string} fileName name of the file to be passed as query paremeter
+     * 
+     * @apiSuccessExample {json} Success-Response:
+     * {
+                errorOccurred: false
+                message: "file saved successfully"
+                status: 200
+                data: {
+                    fileId: "yI9JHn63a"
+                    fileFor: "comment"
+                    fileForId: "XljL0obi"
+                    fileName: "reported.png"
+                }
+            }
+        }
+     *
+     * 
+     */
+
+
      // app.put(`${baseUrl}/testDeleteIssue`, auth.isAuthenticated, controller.testDeleteIssue);
 
 }

@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
+const fileUpload = require('express-fileupload');
 
 // defining config
 const appConfig = require('./config/appConfig');
@@ -27,6 +28,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(helmet());
+app.use(fileUpload());
 app.use(appErrorHandler.appGlobalErrorHandler);
 app.use(routeIpLogger.routeIpLogger);
 app.use(express.static(path.join(__dirname, 'client'))) // used for dev level testing by creating clients
