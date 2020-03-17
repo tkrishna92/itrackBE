@@ -228,6 +228,54 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/issues/deleteComment",
+    "title": "delete comment",
+    "version": "1.0.0",
+    "group": "issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authToken",
+            "description": "<p>authToken to be passed as body, query or header parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "commentId",
+            "description": "<p>id of the comment being deleted to be passed as body parameter</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n            \"errorOccurred\": false,\n            \"message\": \"comment deleted successfully\",\n            \"status\": 200,\n            \"data\": {\n                \"createdOn\": \"2020-03-09T09:13:47.000Z\",\n                \"commentId\": \"1K8HU9EM\",\n                \"commenterId\": \"TuWUOF5B\",\n                \"comment\": \"new comment 1\",\n                \"issueId\": \"aKy6qo0p\"\n            }\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n            \"errorOccurred\": true,\n            \"message\": \"cannot delete others comments\",\n            \"status\": 400,\n            \"data\": null\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/route/issue.js",
+    "groupTitle": "issues",
+    "name": "PostIssuesDeletecomment"
+  },
+  {
+    "type": "post",
     "url": "/issues/deleteIssue",
     "title": "delete issue",
     "version": "1.0.0",
@@ -273,6 +321,52 @@ define({ "api": [
     "filename": "app/route/issue.js",
     "groupTitle": "issues",
     "name": "PostIssuesDeleteissue"
+  },
+  {
+    "type": "post",
+    "url": "/issues/downloadFile",
+    "title": "download file",
+    "version": "1.0.0",
+    "group": "issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authToken",
+            "description": "<p>authToken to be passed as body, query or header parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "fileId",
+            "description": "<p>id of the the file to be passed as query parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "fileName",
+            "description": "<p>name of the file to be passed as query paremeter</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n                errorOccurred: false\n                message: \"file saved successfully\"\n                status: 200\n                data: {\n                    fileId: \"yI9JHn63a\"\n                    fileFor: \"comment\"\n                    fileForId: \"XljL0obi\"\n                    fileName: \"reported.png\"\n                }\n            }\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/route/issue.js",
+    "groupTitle": "issues",
+    "name": "PostIssuesDownloadfile"
   },
   {
     "type": "post",
@@ -335,6 +429,45 @@ define({ "api": [
     "filename": "app/route/issue.js",
     "groupTitle": "issues",
     "name": "PostIssuesEditissue"
+  },
+  {
+    "type": "post",
+    "url": "/issues/getAllFiles",
+    "title": "get all files info",
+    "version": "1.0.0",
+    "group": "issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authToken",
+            "description": "<p>authToken to be passed as body, query or header parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "commentId",
+            "description": "<p>id of the comment being deleted to be passed as body parameter</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n                errorOccurred: false\n                message: \"file saved successfully\"\n                status: 200\n                data: {\n                    fileId: \"yI9JHn63a\"\n                    fileFor: \"comment\"\n                    fileForId: \"XljL0obi\"\n                    fileName: \"reported.png\"\n                }\n            }\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/route/issue.js",
+    "groupTitle": "issues",
+    "name": "PostIssuesGetallfiles"
   },
   {
     "type": "post",
@@ -467,14 +600,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "issueId",
-            "description": "<p>issue id of the issue for which the comment are being retreived to be passed as body parameter</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "statusFilter",
-            "description": "<p>status filter to get issues of selected status to be passed as body parameter</p>"
+            "description": "<p>issue id of the issue for which the comments are being retreived to be passed as body parameter</p>"
           },
           {
             "group": "Parameter",
@@ -507,6 +633,203 @@ define({ "api": [
     "filename": "app/route/issue.js",
     "groupTitle": "issues",
     "name": "PostIssuesGetissuecomment"
+  },
+  {
+    "type": "post",
+    "url": "/issues/getReportedIssues",
+    "title": "get reported issues",
+    "version": "1.0.0",
+    "group": "issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authToken",
+            "description": "<p>authToken to be passed as body, query or header parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "skip",
+            "description": "<p>integer value of number of issues to be displayed to be passed as a body parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "statusFilter",
+            "description": "<p>status filter to apply for getting issues to be passed as a body parameter</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n            \"errorOccurred\": false,\n            \"message\": \"showing reported issues\",\n            \"status\": 200,\n            \"data\": [\n                {\n                    \"status\": \"new\",\n                    \"createdOn\": \"2020-03-08T11:09:24.000Z\",\n                    \"watchersId\": [\n                        \"Kzq61Q8u\",\n                        \"TuWUOF5B\"\n                    ],\n                    \"commentsId\": [],\n                    \"issueId\": \"krW_aT6d\",\n                    \"reporterId\": \"Kzq61Q8u\",\n                    \"assignedToId\": \"TuWUOF5B\",\n                    \"title\": \"first search 1\",\n                    \"description\": \"description\"\n                },\n                {\n                    \"status\": \"new\",\n                    \"createdOn\": \"2020-03-08T11:09:19.000Z\",\n                    \"watchersId\": [\n                        \"Kzq61Q8u\",\n                        \"TuWUOF5B\"\n                    ],\n                    \"commentsId\": [\n                        \"ALjnTVhh\",\n                        \"T878fwym\",\n                        \"PiJW1pqK\",\n                        \"o-5CNqIF\",\n                        \"uqHZzvQP\",\n                        \"HZjsa40B\",\n                        \"__K2nvd4\",\n                        \"YeRqTDKB\",\n                        \"58-AqyB6\",\n                        \"4sqF-oKn\",\n                        \"zPn5cRtZ\",\n                        \"FydeBzbn\"\n                    ],\n                    \"issueId\": \"aKy6qo0p\",\n                    \"reporterId\": \"Kzq61Q8u\",\n                    \"assignedToId\": \"TuWUOF5B\",\n                    \"title\": \"first search\",\n                    \"description\": \"description\"\n                }\n            ],\n            \"count\": 2\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n            \"errorOccurred\": true,\n            \"message\": \"no reported issues found\",\n            \"status\": 404,\n            \"data\": null\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/route/issue.js",
+    "groupTitle": "issues",
+    "name": "PostIssuesGetreportedissues"
+  },
+  {
+    "type": "post",
+    "url": "/issues/getSingleIssue",
+    "title": "get single issue",
+    "version": "1.0.0",
+    "group": "issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authToken",
+            "description": "<p>authToken to be passed as body, query or header parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>id of the issue being queried to be passed as a body parameter</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n                    errorOccurred: false\n                    message: \"showing selected issue\"\n                    status: 200\n                    data:\n                    status: \"new\"\n                    createdOn: \"2020-03-12T17:47:49.000Z\"\n                    watchersId: (4) [\"pH4WJZvj\", \"DrGeEuAI\", \"TuWUOF5B\", \"QafCGGqX\"]\n                    commentsId: [\"cElLlwss\"]\n                    issueId: \"kCmDioqD\"\n                    reporterId: \"pH4WJZvj\"\n                    assignedToId: \"DrGeEuAI\"\n                    title: \"new issue 2 edit\"\n                    description: \"description of new\n                }\n            ],\n            \"count\": 4\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n            \"errorOccurred\": true,\n            \"message\": \"issues not found\",\n            \"status\": 404,\n            \"data\": null\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/route/issue.js",
+    "groupTitle": "issues",
+    "name": "PostIssuesGetsingleissue"
+  },
+  {
+    "type": "post",
+    "url": "/issues/getWatchingIssues",
+    "title": "get watching issues",
+    "version": "1.0.0",
+    "group": "issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authToken",
+            "description": "<p>authToken to be passed as body, query or header parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "skip",
+            "description": "<p>integer value of number of issues to be displayed to be passed as a body parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "statusFilter",
+            "description": "<p>status filter to apply for getting issues to be passed as a body parameter</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n            \"errorOccurred\": false,\n            \"message\": \"showing watching issues\",\n            \"status\": 200,\n            \"data\": [\n                {\n                    \"status\": \"in-progress\",\n                    \"createdOn\": \"2020-03-08T11:09:28.000Z\",\n                    \"watchersId\": [\n                        \"Kzq61Q8u\",\n                        \"TuWUOF5B\"\n                    ],\n                    \"commentsId\": [],\n                    \"issueId\": \"PhDPgHgv\",\n                    \"reporterId\": \"Kzq61Q8u\",\n                    \"assignedToId\": \"TuWUOF5B\",\n                    \"title\": \"first search 2\",\n                    \"description\": \"description\"\n                },\n                {\n                    \"status\": \"in-progress\",\n                    \"createdOn\": \"2020-03-07T14:28:45.000Z\",\n                    \"watchersId\": [\n                        \"pH4WJZvj\",\n                        \"TuWUOF5B\",\n                        \"Kzq61Q8u\"\n                    ],\n                    \"commentsId\": [\n                        \"rsCswDe5\",\n                        \"w9K9ifyY\",\n                        \"7DwqoazN\"\n                    ],\n                    \"issueId\": \"Zk6ln5Q5\",\n                    \"reporterId\": \"pH4WJZvj\",\n                    \"assignedToId\": \"pH4WJZvj\",\n                    \"title\": \"first\",\n                    \"description\": \"description\"\n                }\n            ],\n            \"count\": 2\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "{\n            \"errorOccurred\": true,\n            \"message\": \"no watching issues found\",\n            \"status\": 404,\n            \"data\": null\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/route/issue.js",
+    "groupTitle": "issues",
+    "name": "PostIssuesGetwatchingissues"
+  },
+  {
+    "type": "post",
+    "url": "/issues/saveFileInfo",
+    "title": "save file info",
+    "version": "1.0.0",
+    "group": "issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authToken",
+            "description": "<p>authToken to be passed as body, query or header parameter</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "commentId",
+            "description": "<p>id of the comment being deleted to be passed as body parameter</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "{\n                errorOccurred: false\n                message: \"file saved successfully\"\n                status: 200\n                data: {\n                    fileId: \"yI9JHn63a\"\n                    fileFor: \"comment\"\n                    fileForId: \"XljL0obi\"\n                    fileName: \"reported.png\"\n                }\n            }\n        }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/route/issue.js",
+    "groupTitle": "issues",
+    "name": "PostIssuesSavefileinfo"
   },
   {
     "type": "post",

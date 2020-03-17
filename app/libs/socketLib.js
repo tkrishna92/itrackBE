@@ -33,8 +33,10 @@ let setServer = (server)=>{
                     socket.emit("error-occurred", {status : 500, error : "invalid token provided"});
                 }else {
                     let currentUser = user.data;
+                    console.log("current user id :"+currentUser.userId);
                     socket.userId = currentUser.userId;
                     socket.email = currentUser.email;
+                    socket.emit("user-loggedin", "loggedin");
                     // let userWatchList = currentUser.watchingIssues;
                     // userWatchList.forEach((issue)=>{
                     //     console.log(issue);
@@ -43,6 +45,17 @@ let setServer = (server)=>{
                 }
             })
         })
+
+        //on receiving "check-user-login" it will check if the user is logged in
+        // and emits "loggedin" on event "user-loggedin"
+        // socket.on("check-user-login",(userId)=>{
+        //     console.log("check-user-login received");
+        //     console.log(userId);
+        //     console.log(socket.userId);
+        //     if(socket.userId == userId){
+        //         socket.emit("user-loggedin", "loggedin");
+        //     }
+        // })
 
         //as soon as the user is verified the client emits "join-issue-room" for every issue the user is watching
         // this will help create a communication of all the notifications of the group

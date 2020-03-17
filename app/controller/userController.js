@@ -499,7 +499,7 @@ let deleteUser = (req,res)=>{
 
 // function to logout user
 let logout = (req, res) => {
-    authModel.remove({ userId: req.user.userId }, (err, result) => {
+    authModel.deleteOne({ userId: req.user.userId }, (err, result) => {
         if (err) {
             logger.error("error removing user details from auth document", "userController : logout", 9);
             let apiResponse = response.generate(true, "error logging out", 500, err);
