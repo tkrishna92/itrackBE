@@ -42,11 +42,11 @@ fs.readdirSync(modelPath).forEach(function (file) {
     if (~file.indexOf('.js')) require(modelPath + '/' + file);
 });
 
-//route
+// route
 let routePath = "./app/route";
 fs.readdirSync(routePath).forEach((file)=>{
-    if (~file.indexOf('.js')) {
-        let route = require(routePath + '/' + file);
+    if(~file.indexOf('.js')){
+        let route = require(routePath+'/'+file);
         route.setRouter(app);
     }
 })
