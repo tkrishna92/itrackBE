@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const shortId = require('shortid');
 const countryList = require('country-list');
 const countryTelephoneCode = require('country-telephone-code');
-const nodemailer = require('nodemailer');
+
 
 //libraries
 const check = require('./../libs/checkLib');
