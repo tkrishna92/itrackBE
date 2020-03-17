@@ -950,20 +950,20 @@ let getAllFiles = (req, res)=>{
 }
 
 //downloading file
-let downloadFile = (req, res)=>{
-    let fileName = `${req.query.fileId}${req.query.fileName}`
-    let file = `./app/files/${fileName}`;
-    let name = path.basename(file);
-    let mimetype = mime.getType(file);
-    res.setHeader('Content-disposition', 'attachment; filename='+name);
-    res.setHeader('Content-type', mimetype);
-    let filestream = fs.createReadStream(file);
-    console.log(filestream);
-    filestream.pipe(res);
-    // let fileName = `${req.query.fileId}${req.query.fileName}`
-    // const file = `./app/files/${fileName}`;
-    // res.sendFile(file);
-}
+// let downloadFile = (req, res)=>{
+//     let fileName = `${req.query.fileId}${req.query.fileName}`
+//     let file = `./app/files/${fileName}`;
+//     let name = path.basename(file);
+//     let mimetype = mime.getType(file);
+//     res.setHeader('Content-disposition', 'attachment; filename='+name);
+//     res.setHeader('Content-type', mimetype);
+//     let filestream = fs.createReadStream(file);
+//     console.log(filestream);
+//     filestream.pipe(res);
+//     // let fileName = `${req.query.fileId}${req.query.fileName}`
+//     // const file = `./app/files/${fileName}`;
+//     // res.sendFile(file);
+// }
 
 //testing delete issue
 let testDeleteIssue = (req, res) => {
@@ -995,6 +995,6 @@ module.exports = {
     deleteComment : deleteComment,
     getSingleIssue : getSingleIssue,
     saveFileInfo : saveFileInfo,
-    getAllFiles : getAllFiles,
-    downloadFile : downloadFile
+    getAllFiles : getAllFiles
+    
 }
