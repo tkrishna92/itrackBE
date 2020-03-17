@@ -44,7 +44,7 @@ fs.readdirSync(modelPath).forEach(function (file) {
 
 //route
 let routePath = "./app/route";
-fs.readdirSync(routePath).forEach(function (file) {
+fs.readdirSync(routePath).forEach((file)=>{
     if (~file.indexOf('.js')) {
         let route = require(routePath + '/' + file);
         route.setRouter(app);
